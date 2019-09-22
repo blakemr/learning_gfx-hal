@@ -134,4 +134,60 @@ fn main() {
         let spirv = include_bytes!("../../assets/shaders/part00.frag");
         device.create_shader_module(spirv).unwrap()
     };
+
+    let pipeline_layout = device.create_pipeline_layout(&[], &[]);
+
+    // A pipeline object encodes almost all the state you need in order to draw
+    // geometry on screen. For now that's really only which shaders to use, what
+    // kind of blending to do, and what kind of primitives to draw.
+    let pipeline = {
+        let vs_entry = EntryPoint::<backend::Backend> {
+            entry: "main",
+            module: &vertex_shader_module,
+            specialization: Default::default(),
+        };
+
+        let fs_entry = EntryPoint::<backend::Backend> {
+            entry: "main",
+            module: &fragment_shader_module,
+            specialization: Default::default(),
+        };
+
+        let shader_entries = GraphicsShaderSet {
+            vertex: vs_entry,
+            fragment: Some(fs_entry),
+            hull: None,
+            domain: None,
+            geometry: None,
+        };
+
+        let subpass = Subpass {
+            index: 0,
+            main_pass: &render_pass,
+        };
+
+        let mut pipeline_desc = GraphicsPipelineDesc::new(
+            shader_entries,
+            Primitive::TriangleList,
+            Rasterizer::FILL,
+            &pipeline_layout,
+            subpass,
+        );
+
+        pipeline_desc
+            .blender
+            .targets
+            .push(ColorBlendDesc(ColorMask::ALL, BlendState::ALPHA));
+
+        device
+            .create_graphics_pipeline(&pipeline_desc, None)
+            .unwrap()
+    };
+
+    // Init the swapchain
+    let swap_config = SwapchainConfig::from_caps(&caps, surface_color_format);
+
+    let extent = swap_config.extent.to_extent();
+
+    let (mut swapchain, backbuffer) = device.create_swapchain(&mut surface, swap_config, None);
 }
