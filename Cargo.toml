@@ -4,20 +4,36 @@ version = "0.1.0"
 authors = ["Matthew Blake <mblak0625@gmail.com>"]
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [[bin]]
-name = "triangle"
-path = "src/bin/00-triangle.rs"
+name = "quad"
+path = "src/bin/00-quad.rs"
 
 [[bin]]
 name = "window"
 path = "src/bin/01-window.rs"
 
+[[bin]]
+name = "triangle"
+path = "src/bin/02-triangle.rs"
+
 [dependencies]
-image = "0.22.2"
+log = "0.4.8"
+env_logger = "0.7.0"
 winit = "0.19.3"
 gfx-hal = "0.3.1"
-gfx-backend-vulkan = "0.3.3"
+arrayvec = "0.5.0"
+
+[target.'cfg(target_os = "macos")'.dependencies.gfx-backend-metal]
+version = "0.3.3"
+optional = true
+
+[target.'cfg(windows)'.dependencies.gfx-backend-dx12]
+version = "0.3.4"
+optional = true
+
+[target.'cfg(all(unix, not(target_os = "macos")))'.dependencies.gfx-backend-vulkan]
+version = "0.3.3"
+optional = true
 
 [build-dependencies]
 glsl-to-spirv = "0.1.7"

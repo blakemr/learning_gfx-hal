@@ -1,7 +1,5 @@
 // Make a window
 
-extern crate winit;
-
 use winit::dpi::LogicalSize;
 use winit::{CreationError, Event, EventsLoop, Window, WindowBuilder, WindowEvent};
 
@@ -43,7 +41,6 @@ impl Default for WinitState {
 }
 
 fn main() {
-    
     let mut win_state = WinitState::default();
 
     // Main loop
