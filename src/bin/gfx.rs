@@ -1,9 +1,21 @@
-/// Learning gfx-hal
-/// attempt 2
-/// Step 1: Fully understand how to make a window
-/// this part shouldn't require gfx-hal at all
+//! Learning gfx-hal
+//! attempt 2
+//! Step 1: Fully understand how to make a window
+//! this part shouldn't require gfx-hal at all
 use winit::{Event, EventsLoop, WindowBuilder, WindowEvent};
 
+/// Window struct. Comprised of a window and an event loop
+///
+/// # args
+/// * **events_loop** *EventsLoop* - event loop object. Controls events. duh
+/// * **window** *WindowBuilder* - window that opens (not the device). Controls how the window looks.
+#[derive(Debug)]
+pub struct EventWindow {
+    pub events_loop: EventsLoop,
+    pub window: WindowBuilder,
+}
+
+/// Main function. Main loop goes here
 fn main() {
     // Winit needs an events loop, so lets give it one.
     // Note: poll_events requires this to be mutable,
