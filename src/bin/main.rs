@@ -1,10 +1,20 @@
 //! Learning gfx-hal
 //! attempt 2
+
+#[cfg(feature = "dx12")]
+use gfx_backend_dx12 as back;
+#[cfg(feature = "metal")]
+use gfx_backend_metal as back;
+#[cfg(feature = "vulkan")]
+use gfx_backend_vulkan as back;
+
 use winit::dpi::LogicalSize;
 use winit::{CreationError, Event, EventsLoop, Window, WindowBuilder, WindowEvent};
 use Err;
 
 #[macro_use]
+extern crate log;
+
 use log::Level;
 
 /// CONSTANTS
@@ -67,6 +77,17 @@ impl Default for EventWindow {
     }
 }
 
+/// Graphics manager
+pub struct GfxState {}
+impl GfxState {
+    pub fn new(window: &Window) -> Result<(), &'static str> {
+        unimplemented!()
+    }
+    pub fn render_screen(&mut self, color: [f32; 4]) -> Result<(), &'static str> {
+        unimplemented!()
+    }
+}
+
 /// Render the screen based on the local state
 ///
 /// ## args
@@ -101,7 +122,7 @@ fn main() {
 
         // Render screen
         if let Err(e) = render_screen(&mut gfx_state, &local_state) {
-            panic!("Rendering Error: {:?}", e);
+            error!("Rendering Error: {:?}", e);
             break;
         }
     }
