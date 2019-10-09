@@ -1,7 +1,5 @@
 //! Learning gfx-hal
 //! attempt 2
-//! Step 1: Fully understand how to make a window
-//! this part shouldn't require gfx-hal at all
 use winit::dpi::LogicalSize;
 use winit::{CreationError, Event, EventsLoop, Window, WindowBuilder, WindowEvent};
 
@@ -16,7 +14,7 @@ pub const WINDOW_SIZE: LogicalSize = LogicalSize {
 
 /// Window with an event loop
 ///
-/// # args
+/// ## args
 /// * **events_loop** *EventsLoop* - event loop object. Controls events. duh
 /// * **window** *WindowBuilder* - window that opens (not the device). Controls how the window looks.
 #[derive(Debug)]
@@ -28,14 +26,14 @@ pub struct EventWindow {
 impl EventWindow {
     /// Init new EventWindow with events_loop and window
     ///
-    /// # args
+    /// ## args
     /// * **title** *String or reference* - Window title
     /// * **size** *LogicalSize* - Window size (x, y).
     ///
-    /// # returns
+    /// ## returns
     /// * Self or CreationError
     ///
-    /// # errors
+    /// ## errors
     /// * **CreationError** - winit error that can happen when trying to make a window
     ///
     pub fn new<T: Into<String>>(title: T, size: LogicalSize) -> Result<Self, CreationError> {
@@ -58,31 +56,44 @@ impl EventWindow {
 impl Default for EventWindow {
     /// Default window. Uses the WINDOW_TITLE and WINDOW_SIZE consts
     ///
-    /// # Errors
+    /// ## Errors
     /// * CreationError - Error when building window
     fn default() -> Self {
         Self::new(WINDOW_TITLE, WINDOW_SIZE).expect("Window creation failed: EventWindow.default()")
     }
 }
 
+/// Render the screen based on the local state
+///
+/// ## args
+/// * **gfx** *GfxState* - object handling the graphics operations
+/// * **locals** *LocalState* - object handling the inputs/state changes/etc...
+///
+/// ## Returns
+/// Returns nothing unless there's an error
+///
+/// ## Errors
+/// Returns an error to be handled by the user if something goes wrong
+pub fn render_screen(gfx: &mut GfxState, locals: &LocalState) -> Result<(), &str> {
+    gfx.draw_clear_frame(locals.color());
+}
+
 /// Main function. Main loop goes here
 fn main() {
-    // Create a new EventWindow
+    // INIT MANAGERS
     let mut event_window = EventWindow::default();
+    let mut gfx_state = GfxState::new(&event_window.window);
+    let mut local_state = LocalState::default();
 
-    // Main loop
-    let mut exit = false;
-    while !exit {
-        // Every loop, poll events for input
-        event_window.events_loop.poll_events(|event| match event {
-            // Check for an exit, if so break loop and end
-            Event::WindowEvent {
-                event: WindowEvent::CloseRequested,
-                ..
-            } => exit = true,
-
-            // Default behavior (for events we don't care about)
-            _ => (),
-        });
+    // MAIN LOOP
+    loop {
+        let inputs = UserInput::poll_events(&mut event_window.events_loop);
+        if inputs.end_requested {
+            break;
+        }
+        local_state.update_from_input(inputs);
+        render_screen(&mut gfx_state, &local_state);
     }
+
+    // CLEANUP
 }
