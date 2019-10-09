@@ -2,6 +2,7 @@
 //! attempt 2
 use winit::dpi::LogicalSize;
 use winit::{CreationError, Event, EventsLoop, Window, WindowBuilder, WindowEvent};
+use Err;
 
 /// CONSTANTS
 // Window name
@@ -92,7 +93,12 @@ fn main() {
             break;
         }
         local_state.update_from_input(inputs);
-        render_screen(&mut gfx_state, &local_state);
+
+        // Render screen
+        if let Err(e) = render_screen(&mut gfx_state, &local_state) {
+            panic!("Rendering Error: {:?}", e);
+            break;
+        }
     }
 
     // CLEANUP
