@@ -4,6 +4,9 @@ use winit::dpi::LogicalSize;
 use winit::{CreationError, Event, EventsLoop, Window, WindowBuilder, WindowEvent};
 use Err;
 
+#[macro_use]
+use log::Level;
+
 /// CONSTANTS
 // Window name
 pub const WINDOW_TITLE: &str = "I'm Learning";
@@ -81,6 +84,8 @@ pub fn render_screen(gfx: &mut GfxState, locals: &LocalState) -> Result<(), &str
 
 /// Main function. Main loop goes here
 fn main() {
+    env_logger::init();
+
     // INIT MANAGERS
     let mut event_window = EventWindow::default();
     let mut gfx_state = GfxState::new(&event_window.window);
