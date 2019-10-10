@@ -8,6 +8,7 @@ use gfx_backend_metal as back;
 #[cfg(feature = "vulkan")]
 use gfx_backend_vulkan as back;
 
+use gfx_hal::pso::PipelineStage;
 use winit::dpi::LogicalSize;
 use winit::{CreationError, Event, EventsLoop, Window, WindowBuilder, WindowEvent};
 use Err;
@@ -25,6 +26,34 @@ pub const WINDOW_SIZE: LogicalSize = LogicalSize {
     width: 500.0,
     height: 500.0,
 };
+
+/// Main function. Main loop goes here
+fn main() {
+    env_logger::init();
+
+    // INIT MANAGERS
+    let mut event_window = EventWindow::default();
+    let mut gfx_state = GfxState::new(&event_window.window);
+    let mut local_state = LocalState::default();
+
+    // MAIN LOOP
+    loop {
+        let inputs = UserInput::poll_events(&mut event_window.events_loop);
+        if inputs.end_requested {
+            break;
+        }
+        local_state.update_from_input(inputs);
+
+        // Render screen
+        if let Err(e) = render_screen(&mut gfx_state, &local_state) {
+            error!("Rendering Error: {:?}", e);
+            break;
+        }
+    }
+
+    // CLEANUP
+    // TODO
+}
 
 /// Window with an event loop
 ///
@@ -80,15 +109,57 @@ impl Default for EventWindow {
 /// Graphics manager
 pub struct GfxState {}
 impl GfxState {
+    /// Make new GfxState
+    ///
+    /// ## args
+    /// * **window** *&Window* - window to use when rendering
+    ///
+    /// ## returns
+    /// Result
+    ///
+    /// ## errors
+    /// TODO
     pub fn new(window: &Window) -> Result<(), &'static str> {
         unimplemented!()
     }
-    pub fn render_screen(&mut self, color: [f32; 4]) -> Result<(), &'static str> {
-        unimplemented!()
+    /// Clear the screen to a specified color
+    ///
+    /// ## args
+    /// * **gfx** *GfxState* - object handling the graphics operations
+    /// * **locals** *LocalState* - object handling the inputs/state changes/etc...
+    ///
+    /// ## Returns
+    /// Returns nothing unless there's an error
+    ///
+    /// ## Errors
+    /// Returns an error to be handled by the user if something goes wrong
+    pub fn clear_screen(&mut self, color: [f32; 4]) -> Result<(), &'static str> {
+        // Frame setup
+        // TODO
+
+        // Record commands
+        // TODO
+
+        // Submission
+        let command_buffers = vec![the_command_buffer];
+        let wait_semaphores = vec![(image_available, PipelineStage::COLOR_ATTACHMENT_OUTPUT)];
+        let signal_semaphores = vec![render_finished];
+        let present_wait_semaphores = vec![render_finished];
+        let submission = Submission {
+            command_buffers,
+            wait_semaphores,
+            signal_semaphores,
+        };
+        unsafe {
+            the_command_queue.submit(submission, Some(flight_fence));
+            the_swapchain
+                .present(&mut the_command_queue, i_u32, present_wait_semaphores)
+                .map_err(|_| "Failed to present into the swapchain!")
+        }
     }
 }
 
-/// Render the screen based on the local state
+/// Clear the screen to a specified color
 ///
 /// ## args
 /// * **gfx** *GfxState* - object handling the graphics operations
@@ -99,33 +170,6 @@ impl GfxState {
 ///
 /// ## Errors
 /// Returns an error to be handled by the user if something goes wrong
-pub fn render_screen(gfx: &mut GfxState, locals: &LocalState) -> Result<(), &str> {
-    gfx.draw_clear_frame(locals.color());
-}
-
-/// Main function. Main loop goes here
-fn main() {
-    env_logger::init();
-
-    // INIT MANAGERS
-    let mut event_window = EventWindow::default();
-    let mut gfx_state = GfxState::new(&event_window.window);
-    let mut local_state = LocalState::default();
-
-    // MAIN LOOP
-    loop {
-        let inputs = UserInput::poll_events(&mut event_window.events_loop);
-        if inputs.end_requested {
-            break;
-        }
-        local_state.update_from_input(inputs);
-
-        // Render screen
-        if let Err(e) = render_screen(&mut gfx_state, &local_state) {
-            error!("Rendering Error: {:?}", e);
-            break;
-        }
-    }
-
-    // CLEANUP
+pub fn clear_screen(gfx: &mut GfxState, locals: &LocalState) -> Result<(), &str> {
+    gfx.clear_screen(locals.color());
 }
